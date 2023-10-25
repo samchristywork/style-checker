@@ -1,0 +1,7 @@
+files:
+  should-exist:
+    - README.md
+    - .gitignore
+directories:
+  should-exist:
+    - src
