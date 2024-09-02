@@ -1,6 +1,13 @@
 #!/bin/bash
 
-cd ~/git/code-search/all_repos
+cd all_repos
+
+function test_files() {
+  while test "$#" -gt "0"; do
+    test -e "$1" || echo "$1"
+    shift
+  done
+}
 
 (
 for repo in *; do
@@ -9,15 +16,28 @@ for repo in *; do
 
     # Get every line from errcheck that don't include defer
     test -e go.mod && ~/go/bin/errcheck . | grep -v defer | \
-      sed 's/^/e /g'
+      sed 's/^/errcheck     |/g'
 
     # Find lines that are longer than 120 characters
-    git grep -n -r ".\{120\}" | grep -v "go.sum\|svg" | \
-      sed 's/^/l /g'
+    git grep -n -r ".\{120\}" | grep -v "go.sum\|svg\|codegen" | \
+      sed 's/^/line length  |/g'
 
-  ) | sed 's/^./& '$repo':/g'
-done | tee /tmp/style-checker
+    # Test if the following files exist
+    test_files README.md CONTRIBUTING.md LICENSE .gitignore | \
+      sed 's/^/missing file |/g'
 
+    # Make sure C-like projects have a src directory
+    test -e Makefile && \
+      (test -d src || echo Missing src directory in project with a Makefile) | \
+      sed 's/^/missing src   |/g'
+
+  ) | sed  's/^.............|/& '$repo':/g'
+done | \
+  tee /tmp/style-checker | \
+  sed 's/\t/  /g' | \
+  cut -c1-$(tput cols)
+
+echo
 wc -l < /tmp/style-checker | sed 's/$/ warnings/g' > /dev/stderr
 echo "Output saved to /tmp/style-checker" > /dev/stderr
 )
