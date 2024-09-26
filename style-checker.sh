@@ -9,6 +9,20 @@ function test_files() {
   done
 }
 
+function test_file_contains_string() {
+  # Return if the file doesn't exist
+  test -e "$1" || return 0
+
+  grep -qs "$2" "$1"
+  return $?
+}
+
+function test_file_length() {
+  git ls-files | grep "$1$" | while read file; do
+    test -f "$file" && test "$(wc -l < "$file")" -gt "$2" && echo "$file"
+  done
+}
+
 (
 for repo in *; do
   (
