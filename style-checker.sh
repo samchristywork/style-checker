@@ -45,22 +45,29 @@ for repo in *; do
 
     # Get every line from errcheck that don't include defer
     test -e go.mod && ~/go/bin/errcheck . | grep -v defer | \
-      sed 's/^/errcheck     |/g'
+      sed 's/^/errcheck        |/g'
 
     # Find lines that are longer than 120 characters
     git grep -n -r ".\{120\}" | grep -v "go.sum\|svg\|codegen" | \
-      sed 's/^/line length  |/g'
+      sed 's/^/line length     |/g'
+
+    # Find C files that are longer than 500 lines
+    test_file_length ".c" 500 | \
+      sed 's/^/file length     |/g'
 
     # Test if the following files exist
-    test_files README.md CONTRIBUTING.md LICENSE .gitignore | \
-      sed 's/^/missing file |/g'
+    test_files README.md CONTRIBUTING.md LICENSE .gitignore src/screenshot.png \
+      scripts/build.sh scripts/format.sh scripts/lint.sh scripts/run.sh \
+      scripts/test.sh | \
+      sed 's/^/missing file    |/g'
 
     # Make sure C-like projects have a src directory
     test -e Makefile && \
       (test -d src || echo Missing src directory in project with a Makefile) | \
-      sed 's/^/missing src   |/g'
+      sed 's/^/missing src     |/g'
 
-  ) | sed  's/^.............|/& '$repo':/g'
+
+  ) | sed  's/^................|/& '$repo':/g'
 done | \
   tee /tmp/style-checker | \
   sed 's/\t/  /g' | \
