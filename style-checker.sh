@@ -1,5 +1,8 @@
 #!/bin/bash
 
+last_commit_after="2024-02-01"
+last_commit_before="2024-05-01"
+
 cd all_repos
 
 function test_files() {
@@ -27,6 +30,18 @@ function test_file_length() {
 for repo in *; do
   (
     cd "$repo"
+
+    test -z "$last_commit_before" || \
+    test -z "$(git log --since="$last_commit_before")" || {
+      #echo "Skipping $repo" > /dev/stderr
+      exit
+    }
+
+    test -z "$last_commit_after" || \
+    test -z "$(git log --until="$last_commit_after")" || {
+      #echo "Skipping $repo" > /dev/stderr
+      exit
+    }
 
     # Get every line from errcheck that don't include defer
     test -e go.mod && ~/go/bin/errcheck . | grep -v defer | \
