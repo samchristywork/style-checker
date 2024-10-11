@@ -82,4 +82,5 @@ done | \
 echo
 wc -l < /tmp/style-checker | sed 's/$/ warnings/g' > /dev/stderr
 echo "Output saved to /tmp/style-checker" > /dev/stderr
+cut -d'|' -f1 /tmp/style-checker | sort | uniq -c | sort -h
 )
