@@ -66,6 +66,12 @@ for repo in *; do
       (test -d src || echo Missing src directory in project with a Makefile) | \
       sed 's/^/missing src     |/g'
 
+    # Make sure README files contain the right sections
+    for section in Overview Features Usage License; do
+      test_file_contains_string README.md "$section" || \
+      echo Missing "$section" section in README | \
+      sed 's/^/missing section |/g'
+    done
 
   ) | sed  's/^................|/& '$repo':/g'
 done | \
